@@ -29,24 +29,24 @@ namespace TodoAPI_Ng.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     IsDone = table.Column<bool>(nullable: false),
-                    Message = table.Column<string>(nullable: true),
-                    ToDoListId = table.Column<int>(nullable: true)
+                    ListId = table.Column<int>(nullable: true),
+                    Message = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ToDo", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ToDo_ToDoList_ToDoListId",
-                        column: x => x.ToDoListId,
+                        name: "FK_ToDo_ToDoList_ListId",
+                        column: x => x.ListId,
                         principalTable: "ToDoList",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ToDo_ToDoListId",
+                name: "IX_ToDo_ListId",
                 table: "ToDo",
-                column: "ToDoListId");
+                column: "ListId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

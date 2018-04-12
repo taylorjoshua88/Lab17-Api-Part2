@@ -16,7 +16,7 @@ namespace TodoAPI_Ng.Controllers
     {
         private readonly ToDoNgDbContext _context;
 
-        public ToDoController(ToDoNgDbContext context) 
+        public ToDoController(ToDoNgDbContext context)
         {
             _context = context;
         }
@@ -50,7 +50,15 @@ namespace TodoAPI_Ng.Controllers
                 return BadRequest("Empty or invalid ToDo item body provided");
             }
 
-            await _context.AddAsync(toDo);
+            // Ensure the specified todo list actually exists
+            if (toDo.ListId.HasValue &&
+                !(await _context.ToDoList.AnyAsync(l => l.Id == toDo.ListId)))
+            {
+                return StatusCode(StatusCodes.Status409Conflict,
+                    "Could not find a todo list with an Id that matches provided ListId");
+            }
+
+            await _context.ToDo.AddAsync(toDo);
 
             try
             {
@@ -74,6 +82,14 @@ namespace TodoAPI_Ng.Controllers
                 return BadRequest("Provided ToDo item body is empty, invalid, or does not match the id provided in routing");
             }
 
+            // Ensure the specified todo list actually exists
+            if (toDo.ListId.HasValue &&
+                !(await _context.ToDoList.AnyAsync(l => l.Id == toDo.Id)))
+            {
+                return StatusCode(StatusCodes.Status409Conflict,
+                    "Could not find a todo list with an Id that matches provided ListId");
+            }
+
             ToDo existingToDo;
 
             try
@@ -91,15 +107,7 @@ namespace TodoAPI_Ng.Controllers
             existingToDo.IsDone = toDo.IsDone;
             existingToDo.ListId = toDo.ListId;
 
-            // If ListId is not null in the PUT body, make sure that it actually corresponds to an
-            // existing ToDoList entity
-            if (existingToDo.ListId.HasValue && 
-                !(await _context.ToDoList.AnyAsync(l => l.Id == existingToDo.ListId)))
-            {
-                return StatusCode(StatusCodes.Status409Conflict,
-                    "The provided ListId in the request body does not correspond with a ToDoList entity");
-            }
-
+            // Try to commit all pending changes to the database
             try
             {
                 await _context.SaveChangesAsync();

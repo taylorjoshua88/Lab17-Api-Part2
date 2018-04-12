@@ -11,8 +11,8 @@ using TodoAPI_Ng.Data;
 namespace TodoAPI_Ng.Migrations
 {
     [DbContext(typeof(ToDoNgDbContext))]
-    [Migration("20180411164207_Initial")]
-    partial class Initial
+    [Migration("20180412040021_ChangedRelationships")]
+    partial class ChangedRelationships
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -28,13 +28,13 @@ namespace TodoAPI_Ng.Migrations
 
                     b.Property<bool>("IsDone");
 
-                    b.Property<string>("Message");
+                    b.Property<int?>("ListId");
 
-                    b.Property<int?>("ToDoListId");
+                    b.Property<string>("Message");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ToDoListId");
+                    b.HasIndex("ListId");
 
                     b.ToTable("ToDo");
                 });
@@ -53,9 +53,9 @@ namespace TodoAPI_Ng.Migrations
 
             modelBuilder.Entity("TodoAPI_Ng.Models.ToDo", b =>
                 {
-                    b.HasOne("TodoAPI_Ng.Models.ToDoList")
-                        .WithMany("Items")
-                        .HasForeignKey("ToDoListId");
+                    b.HasOne("TodoAPI_Ng.Models.ToDoList", "List")
+                        .WithMany()
+                        .HasForeignKey("ListId");
                 });
 #pragma warning restore 612, 618
         }

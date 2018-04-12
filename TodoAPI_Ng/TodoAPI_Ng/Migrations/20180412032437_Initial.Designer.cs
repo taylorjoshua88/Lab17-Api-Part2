@@ -11,8 +11,8 @@ using TodoAPI_Ng.Data;
 namespace TodoAPI_Ng.Migrations
 {
     [DbContext(typeof(ToDoNgDbContext))]
-    [Migration("20180411172131_ManyToOne")]
-    partial class ManyToOne
+    [Migration("20180412032437_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -54,7 +54,7 @@ namespace TodoAPI_Ng.Migrations
             modelBuilder.Entity("TodoAPI_Ng.Models.ToDo", b =>
                 {
                     b.HasOne("TodoAPI_Ng.Models.ToDoList", "List")
-                        .WithMany()
+                        .WithMany("Items")
                         .HasForeignKey("ListId");
                 });
 #pragma warning restore 612, 618
