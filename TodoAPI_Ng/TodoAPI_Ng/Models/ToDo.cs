@@ -12,5 +12,8 @@ namespace TodoAPI_Ng.Models
         public string Message { get; set; }
 
         public bool IsDone { get; set; }
+
+        public int? ListId { get; set; }
+        public ToDoList List { get; set; }
     }
 }

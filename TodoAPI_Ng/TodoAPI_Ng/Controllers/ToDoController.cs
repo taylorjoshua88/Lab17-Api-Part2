@@ -32,7 +32,8 @@ namespace TodoAPI_Ng.Controllers
         {
             try
             {
-                return Ok(await _context.ToDo.FirstAsync(t => t.Id == id));
+                return Ok(await _context.ToDo.Include(t => t.List)
+                                             .FirstAsync(t => t.Id == id));
             }
             catch
             {
@@ -44,9 +45,9 @@ namespace TodoAPI_Ng.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ToDo toDo)
         {
-            if (toDo is null)
+            if (toDo is null || !ModelState.IsValid)
             {
-                return BadRequest("Empty ToDo item body provided");
+                return BadRequest("Empty or invalid ToDo item body provided");
             }
 
             await _context.AddAsync(toDo);
@@ -68,9 +69,9 @@ namespace TodoAPI_Ng.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(int id, [FromBody] ToDo toDo)
         {
-            if (toDo is null || id != toDo.Id)
+            if (toDo is null || id != toDo.Id || !ModelState.IsValid)
             {
-                return BadRequest("Provided ToDo item body is empty or does not match the id provided in routing");
+                return BadRequest("Provided ToDo item body is empty, invalid, or does not match the id provided in routing");
             }
 
             ToDo existingToDo;
@@ -88,8 +89,16 @@ namespace TodoAPI_Ng.Controllers
             // Update existingToDo object to match the user provided toDo without touching the Id
             existingToDo.Message = toDo.Message;
             existingToDo.IsDone = toDo.IsDone;
+            existingToDo.ListId = toDo.ListId;
 
-            _context.ToDo.Update(existingToDo);
+            // If ListId is not null in the PUT body, make sure that it actually corresponds to an
+            // existing ToDoList entity
+            if (existingToDo.ListId.HasValue && 
+                !(await _context.ToDoList.AnyAsync(l => l.Id == existingToDo.ListId)))
+            {
+                return StatusCode(StatusCodes.Status409Conflict,
+                    "The provided ListId in the request body does not correspond with a ToDoList entity");
+            }
 
             try
             {
